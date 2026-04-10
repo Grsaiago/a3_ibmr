@@ -34,8 +34,7 @@ abstract class AEmployee implements ICalculateSalary {
 
     protected AEmployee(String name, String registry) {
         this.name = name;
-        this.registry = name;
-        return;
+        this.registry = registry;
     }
 
     public String getName() {
@@ -51,7 +50,6 @@ class DefaultEmployee extends AEmployee {
 
     public DefaultEmployee(String name, String registry) {
         super(name, registry);
-        return;
     }
 
     @Override
@@ -65,8 +63,8 @@ class DefaultEmployee extends AEmployee {
             "Nome: %s\nMatrícula: %s\nSalário Fixo: %.1f, Extras: 0.0\nSalário final: %.1f",
             this.name,
             this.registry,
-            this.BASE_SALARY,
-            this.BASE_SALARY
+            (float) this.BASE_SALARY,
+            (float) this.BASE_SALARY
         );
     }
 }
@@ -95,9 +93,9 @@ class CommissionedEmployee extends AEmployee {
             "Nome: %s\nMatrícula: %s\nSalário Fixo: %.1f, Comissão: %.1f\nSalário final: %.1f",
             this.name,
             this.registry,
-            this.commission,
             this.BASE_SALARY,
-            this.BASE_SALARY
+            this.commission,
+            this.calculateSalary()
         );
     }
 }
@@ -126,9 +124,9 @@ class ProductivityEmployee extends AEmployee {
             "Nome: %s\nMatrícula: %s\nSalário Fixo: %.1f, Produtividade: %.1f\nSalário final: %.1f",
             this.name,
             this.registry,
-            this.productivity,
             this.BASE_SALARY,
-            this.BASE_SALARY
+            this.productivity,
+            this.calculateSalary()
         );
     }
 }
@@ -151,18 +149,6 @@ class EmployeeRegistry {
             System.out.println(employee);
             System.out.println("## -------- ##");
         }
-    }
-
-    public void addDefaultEmployeeFromUserInput(Scanner sc) {
-        String name;
-        String registry;
-
-        System.out.println("qual o nome do funcionário?");
-        name = sc.nextLine();
-        System.out.println("qual o registro do funcionário?");
-        registry = sc.nextLine();
-        this.addEmployee(new DefaultEmployee(name, registry));
-        return;
     }
 }
 
@@ -206,20 +192,23 @@ class REPL {
     }
 
     private void dispatchOperation(Operation op) {
-        AEmployee e;
         switch (op) {
             case EXIT:
                 System.out.println("Adeus!");
                 this.sc.close();
+                System.exit(0);
                 return;
             case REGISTER_DEFAULT_EMPLOYEE:
-                e = this.readDefaultEmployee();
+                this.readDefaultEmployee();
                 break;
             case REGISTER_COMMISSIONED_EMPLOYEE:
+                this.readCommissionedEmployee();
                 break;
             case REGISTER_PRODUCTIVITY_EMPLOYEE:
+                this.readProductivityEmployee();
                 break;
             case GENERATE_PAYMENT_SHEET:
+                this.registry.printSalaries();
                 break;
         }
     }
@@ -227,9 +216,9 @@ class REPL {
     private void readDefaultEmployee() {
         Boolean valid = false;
         while (!valid) {
-            this.out.println("Insira o nome do funcionário");
+            this.out.println("Insira o nome do funcionário:");
             String name = this.sc.nextLine();
-            this.out.println("Insira o identificador do funcionário");
+            this.out.println("Insira o identificador do funcionário:");
             String registry = this.sc.nextLine();
             try {
                 this.registry.addEmployee(new DefaultEmployee(name, registry));
@@ -245,14 +234,13 @@ class REPL {
     private void readCommissionedEmployee() {
         Boolean valid = false;
         while (!valid) {
-            this.out.println("Insira o nome do funcionário");
+            this.out.println("Insira o nome do funcionário:");
             String name = this.sc.nextLine();
-            this.out.println("Insira o identificador do funcionário");
+            this.out.println("Insira o identificador do funcionário:");
             String registry = this.sc.nextLine();
-            this.out.println(
-                "Insira a quantidade de comissão deste funcionário"
-            );
+            this.out.println("Insira a quantidade de comissão deste funcionário:");
             Float commission = this.sc.nextFloat();
+            this.sc.nextLine();
             try {
                 this.registry.addEmployee(
                     new CommissionedEmployee(name, registry, commission)
@@ -260,7 +248,7 @@ class REPL {
                 valid = true;
             } catch (IllegalArgumentException e) {
                 this.out.println(
-                    "Argumentos inválidos para criação do funcionário padrão. Por favor, tente novamente."
+                    "Argumentos inválidos para criação do funcionário comissionado. Por favor, tente novamente."
                 );
             }
         }
@@ -269,12 +257,13 @@ class REPL {
     private void readProductivityEmployee() {
         boolean valid = false;
         while (!valid) {
-            this.out.println("Insira o nome do funcionário");
+            this.out.println("Insira o nome do funcionário:");
             String name = this.sc.nextLine();
-            this.out.println("Insira o identificador do funcionário");
+            this.out.println("Insira o identificador do funcionário:");
             String registry = this.sc.nextLine();
-            this.out.println("Insira o identificador do funcionário");
+            this.out.println("Insira a produtividade do funcionário:");
             Float productivity = this.sc.nextFloat();
+            this.sc.nextLine();
             try {
                 this.registry.addEmployee(
                     new ProductivityEmployee(name, registry, productivity)
@@ -282,7 +271,7 @@ class REPL {
                 valid = true;
             } catch (IllegalArgumentException e) {
                 this.out.println(
-                    "Argumentos inválidos para criação do funcionário padrão. Por favor, tente novamente."
+                    "Argumentos inválidos para criação do funcionário de produtividade. Por favor, tente novamente."
                 );
             }
         }
@@ -301,8 +290,8 @@ class REPL {
 }
 
 public class App {
-
     public static void main(String[] args) {
         REPL app = new REPL(System.in, System.out);
+        app.run();
     }
 }
