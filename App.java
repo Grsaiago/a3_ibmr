@@ -1,8 +1,8 @@
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 enum Operation {
@@ -22,7 +22,7 @@ enum Operation {
 }
 
 interface ICalculateSalary {
-    double calculateSalary();
+    float calculateSalary();
 }
 
 abstract class AEmployee implements ICalculateSalary {
@@ -53,7 +53,7 @@ class DefaultEmployee extends AEmployee {
     }
 
     @Override
-    public double calculateSalary() {
+    public float calculateSalary() {
         return this.BASE_SALARY;
     }
 
@@ -83,8 +83,8 @@ class CommissionedEmployee extends AEmployee {
     }
 
     @Override
-    public double calculateSalary() {
-        return this.BASE_SALARY + this.commission;
+    public float calculateSalary() {
+        return this.commission + this.BASE_SALARY;
     }
 
     @Override
@@ -93,7 +93,7 @@ class CommissionedEmployee extends AEmployee {
             "Nome: %s\nMatrícula: %s\nSalário Fixo: %.1f, Comissão: %.1f\nSalário final: %.1f",
             this.name,
             this.registry,
-            this.BASE_SALARY,
+            (float) this.BASE_SALARY,
             this.commission,
             this.calculateSalary()
         );
@@ -114,7 +114,7 @@ class ProductivityEmployee extends AEmployee {
     }
 
     @Override
-    public double calculateSalary() {
+    public float calculateSalary() {
         return this.BASE_SALARY + this.productivity;
     }
 
@@ -124,7 +124,7 @@ class ProductivityEmployee extends AEmployee {
             "Nome: %s\nMatrícula: %s\nSalário Fixo: %.1f, Produtividade: %.1f\nSalário final: %.1f",
             this.name,
             this.registry,
-            this.BASE_SALARY,
+            (float) this.BASE_SALARY,
             this.productivity,
             this.calculateSalary()
         );
@@ -218,6 +218,7 @@ class REPL {
         while (!valid) {
             this.out.println("Insira o nome do funcionário:");
             String name = this.sc.nextLine();
+            // if (!name.matches("[A-Za-z]+")) {}
             this.out.println("Insira o identificador do funcionário:");
             String registry = this.sc.nextLine();
             try {
@@ -238,8 +239,19 @@ class REPL {
             String name = this.sc.nextLine();
             this.out.println("Insira o identificador do funcionário:");
             String registry = this.sc.nextLine();
-            this.out.println("Insira a quantidade de comissão deste funcionário:");
-            Float commission = this.sc.nextFloat();
+            this.out.println(
+                "Insira a quantidade de comissão deste funcionário:"
+            );
+            Float commission = (float) 0;
+            try {
+                commission = this.sc.nextFloat();
+            } catch (InputMismatchException e) {
+                this.out.println(
+                    "A comissão deve ser um número. Preencha tudo de novo, por favor"
+                );
+                this.sc.nextLine();
+                continue;
+            }
             this.sc.nextLine();
             try {
                 this.registry.addEmployee(
@@ -262,7 +274,16 @@ class REPL {
             this.out.println("Insira o identificador do funcionário:");
             String registry = this.sc.nextLine();
             this.out.println("Insira a produtividade do funcionário:");
-            Float productivity = this.sc.nextFloat();
+            Float productivity = (float) 0;
+            try {
+                productivity = this.sc.nextFloat();
+            } catch (InputMismatchException e) {
+                this.out.println(
+                    "A produtividade deve ser um número. Preencha tudo de novo, por favor"
+                );
+                this.sc.nextLine();
+                continue;
+            }
             this.sc.nextLine();
             try {
                 this.registry.addEmployee(
@@ -290,6 +311,7 @@ class REPL {
 }
 
 public class App {
+
     public static void main(String[] args) {
         REPL app = new REPL(System.in, System.out);
         app.run();
